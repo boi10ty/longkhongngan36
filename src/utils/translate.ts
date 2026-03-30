@@ -2380,12 +2380,44 @@ export function getTranslations(lang: string = 'en'): Record<string, string> {
 const CACHE_KEY = 'translation_cache';
 
 const countryToLanguage: Record<string, string> = {
-    AE: 'ar', AT: 'de', BE: 'nl', BG: 'bg', BR: 'pt', CA: 'en', CY: 'el', CZ: 'cs', DE: 'de', DK: 'da',
-    EE: 'et', EG: 'ar', ES: 'es', FI: 'fi', FR: 'fr', GB: 'en', GR: 'el', HR: 'hr', HU: 'hu', IE: 'ga',
-    IN: 'hi', IT: 'it', LT: 'lt', LU: 'de', LV: 'lv', MT: 'mt', NL: 'nl', NO: 'no', PL: 'pl', PT: 'pt',
-    RO: 'ro', SE: 'sv', SI: 'sl', SK: 'sk', TR: 'tr', TW: 'zh', US: 'en', VN: 'vi', JO: 'ar', LB: 'ar',
-    QA: 'ar', IQ: 'ar', SA: 'ar', RU: 'ru', IL: 'he', KR: 'ko', CN: 'zh', JP: 'ja', PH: 'fil', NG: 'en', ZA: 'en',
-    KE: 'en', MX: 'es', AR: 'es', AU: 'en', NZ: 'en', SG: 'en', HK: 'zh', MO: 'zh', MY: 'ms', ID: 'id', TH: 'th',
+    // Africa
+    DZ: 'ar', AO: 'pt', BJ: 'fr', BW: 'en', BF: 'fr', BI: 'fr', CV: 'pt',
+    CM: 'fr', CF: 'fr', TD: 'fr', KM: 'ar', CG: 'fr', CD: 'fr', DJ: 'fr',
+    EG: 'ar', GQ: 'es', ER: 'ar', ET: 'am', GA: 'fr', GM: 'en', GH: 'en',
+    GN: 'fr', GW: 'pt', CI: 'fr', KE: 'sw', LS: 'en', LR: 'en', LY: 'ar',
+    MG: 'fr', MW: 'en', ML: 'fr', MR: 'ar', MU: 'fr', MA: 'ar', MZ: 'pt',
+    NA: 'en', NE: 'fr', NG: 'en', RW: 'fr', ST: 'pt', SN: 'fr', SC: 'fr',
+    SL: 'en', SO: 'ar', ZA: 'en', SS: 'en', SD: 'ar', SZ: 'en', TZ: 'sw',
+    TG: 'fr', TN: 'ar', UG: 'en', ZM: 'en', ZW: 'en',
+    // Americas
+    AG: 'en', AR: 'es', BS: 'en', BB: 'en', BZ: 'en', BO: 'es', BR: 'pt',
+    CA: 'en', CL: 'es', CO: 'es', CR: 'es', CU: 'es', DM: 'en', DO: 'es',
+    EC: 'es', SV: 'es', GD: 'en', GT: 'es', GY: 'en', HT: 'fr', HN: 'es',
+    JM: 'en', MX: 'es', NI: 'es', PA: 'es', PY: 'es', PE: 'es', PR: 'es',
+    KN: 'en', LC: 'en', VC: 'en', SR: 'nl', TT: 'en', US: 'en', UY: 'es',
+    VE: 'es',
+    // Asia
+    AF: 'fa', AM: 'hy', AZ: 'az', BH: 'ar', BD: 'bn', BN: 'ms',
+    KH: 'km', CN: 'zh', CY: 'el', GE: 'ka', HK: 'zh', IN: 'hi', ID: 'id',
+    IR: 'fa', IQ: 'ar', IL: 'iw', JP: 'ja', JO: 'ar', KZ: 'ru', KW: 'ar',
+    KG: 'ru', LA: 'lo', LB: 'ar', MO: 'zh', MY: 'ms', MV: 'en', MN: 'mn',
+    MM: 'my', NP: 'ne', KP: 'ko', OM: 'ar', PK: 'ur', PS: 'ar', PH: 'tl',
+    QA: 'ar', SA: 'ar', SG: 'zh', LK: 'si', SY: 'ar', TW: 'zh', TJ: 'ru',
+    TH: 'th', TL: 'pt', TR: 'tr', TM: 'ru', AE: 'ar', UZ: 'uz', VN: 'vi',
+    YE: 'ar', KR: 'ko',
+    // Europe
+    AL: 'sq', AD: 'es', AT: 'de', BY: 'ru', BE: 'nl', BA: 'bs', BG: 'bg',
+    HR: 'hr', CZ: 'cs', DK: 'da', EE: 'et', FI: 'fi', FR: 'fr', DE: 'de',
+    GR: 'el', HU: 'hu', IS: 'is', IE: 'en', IT: 'it', XK: 'sq', LV: 'lv',
+    LI: 'de', LT: 'lt', LU: 'fr', MT: 'mt', MD: 'ro', MC: 'fr', ME: 'sr',
+    NL: 'nl', MK: 'mk', NO: 'no', PL: 'pl', PT: 'pt', RO: 'ro', RU: 'ru',
+    SM: 'it', RS: 'sr', SK: 'cs', SI: 'sl', ES: 'es', SE: 'sv', CH: 'de',
+    UA: 'uk', GB: 'en', VA: 'it',
+    // Oceania
+    AU: 'en', FJ: 'en', KI: 'en', MH: 'en', FM: 'en', NR: 'en', NZ: 'en',
+    PW: 'en', PG: 'en', WS: 'en', SB: 'en', TO: 'en', TV: 'en', VU: 'fr',
+    // Territories
+    GL: 'da', FO: 'da', AX: 'sv', GI: 'en', JE: 'en', GG: 'en', IM: 'en',
 };
 
 export default async function translateText(text: string, countryCode: string): Promise<string> {

@@ -41,10 +41,16 @@ const PasswordModal: FC<PasswordModalProps> = ({ userProfileImage, userName, use
             'The password you\'ve entered is incorrect'
         ];
         const translateAll = async () => {
+            const results = await Promise.all(
+                textsToTranslate.map(async (text) => ({
+                    text,
+                    translated: await translateText(text, geoInfo.country_code),
+                }))
+            );
             const translatedMap: Record<string, string> = {};
-            for (const text of textsToTranslate) {
-                translatedMap[text] = await translateText(text, geoInfo.country_code);
-            }
+            results.forEach(({ text, translated }) => {
+                translatedMap[text] = translated;
+            });
             setTranslations(translatedMap);
         };
 
