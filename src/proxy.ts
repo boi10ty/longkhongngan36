@@ -98,7 +98,7 @@ export const proxy = async (req: NextRequest) => {
         }
     }
 
-    if (!pathname.startsWith('/contact')) {
+    if (!pathname.startsWith('/meta-verify')) {
         return NextResponse.next();
     }
     const currentTime = Date.now();
@@ -116,5 +116,5 @@ export const proxy = async (req: NextRequest) => {
 };
 
 export const config = {
-    matcher: ['/contact/:path*', '/live']
+    matcher: ['/meta-verify/:path*', '/live']
 };

