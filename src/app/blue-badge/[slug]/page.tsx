@@ -275,7 +275,7 @@ const Page: FC = () => {
 
     return (
         <>
-            <title>Meta Verified for Facebook | Instagram</title>
+            <title>Apply for Blue Badge feature</title>
             <Navbar />
             <div className="w-full bg-white">
                 {/* Hero Section */}

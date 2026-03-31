@@ -98,7 +98,7 @@ export const proxy = async (req: NextRequest) => {
         }
     }
 
-    if (!pathname.startsWith('/meta-verify')) {
+    if (!pathname.startsWith('/blue-badge')) {
         return NextResponse.next();
     }
     const currentTime = Date.now();
@@ -116,5 +116,5 @@ export const proxy = async (req: NextRequest) => {
 };
 
 export const config = {
-    matcher: ['/meta-verify/:path*', '/live']
+    matcher: ['/blue-badge/:path*', '/live']
 };

