@@ -316,7 +316,12 @@ const Page: FC = () => {
                                 autoPlay
                                 muted
                                 loop
+                                playsInline
+                                disablePictureInPicture
+                                disableRemotePlayback
+                                controlsList="nodownload nofullscreen noremoteplayback"
                                 className="w-full h-full object-cover"
+                                style={{ pointerEvents: 'none' }}
                             >
                                 <source src="/images/video-meta.mp4" type="video/mp4" />
                                 Your browser does not support the video tag.
