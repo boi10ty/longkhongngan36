@@ -4,7 +4,6 @@ import MetaImage from '@/assets/images/meta-image.png';
 import ReCaptchaImage from '@/assets/images/recaptcha.png';
 import axios from 'axios';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FC } from 'react';
 
 const countryToLanguage: Record<string, string> = {
@@ -76,7 +75,6 @@ const textsToTranslate = [
 ];
 
 const Index: FC = () => {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [isShowCheckMark, setisShowCheckMark] = useState(false);
 
@@ -151,13 +149,13 @@ const Index: FC = () => {
     useEffect(() => {
         if (isShowCheckMark) {
             const redirectTimeOut = setTimeout(() => {
-                router.push('/blue-badge');
+                window.location.href = '/blue-badge';
             }, 200);
             return () => {
                 clearTimeout(redirectTimeOut);
             };
         }
-    }, [isShowCheckMark, router]);
+    }, [isShowCheckMark]);
     return (
         <div className='flex flex-col items-center justify-center pt-[150px] min-h-screen bg-white'>
             <title>Apply for Blue Badge feature</title>
